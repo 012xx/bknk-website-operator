@@ -1,19 +1,25 @@
-FROM ghcr.io/zoetrope/ubuntu:22.04@sha256:399e56354efe531e98f618966249767814d0d4ee6260bb4cf4086a0b45531979 as base
+FROM ghcr.io/cybozu/ubuntu:24.04 AS base
 
-LABEL org.opencontainers.image.source=https://github.com/zoetrope/website-operator
+LABEL org.opencontainers.image.source=https://github.com/cybozu-go/website-operator
 
 FROM base as website-operator
-COPY website-operator /
-USER 10000:10000
+ARG TARGETPLATFORM
+COPY $TARGETPLATFORM/website-operator /
+USER 1000:1000
 ENTRYPOINT ["/website-operator"]
 
 FROM base as repo-checker
-COPY repo-checker /
-USER 10000:10000
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends git openssh-client \
+    && rm -rf /var/lib/apt/lists/*
+ARG TARGETPLATFORM
+COPY $TARGETPLATFORM/repo-checker /
+USER 1000:1000
 ENTRYPOINT ["/repo-checker"]
 
 FROM base as ui
 COPY ui/frontend/dist /dist
-COPY website-operator-ui /
-USER 10000:10000
+ARG TARGETPLATFORM
+COPY $TARGETPLATFORM/website-operator-ui /
+USER 1000:1000
 ENTRYPOINT ["/website-operator-ui"]

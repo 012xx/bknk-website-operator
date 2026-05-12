@@ -74,15 +74,15 @@ stop-dev:
 
 $(WEBSITE_OPERATOR): $(GO_FILES) generate
 	mkdir -p bin
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o $@ ./cmd/website-operator
+	CGO_ENABLED=0 GOOS=linux go build -o $@ ./cmd/website-operator
 
 $(REPO_CHECKER): $(GO_FILES)
 	mkdir -p bin
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o $@ ./cmd/repo-checker
+	CGO_ENABLED=0 GOOS=linux go build -o $@ ./cmd/repo-checker
 
 $(WEBSITE_OPERATOR_UI): $(GO_FILES)
 	mkdir -p bin
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o $@ ./cmd/website-operator-ui
+	CGO_ENABLED=0 GOOS=linux go build -o $@ ./cmd/website-operator-ui
 
 .PHONY: frontend
 frontend:

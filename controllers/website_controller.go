@@ -347,8 +347,9 @@ func (r *WebSiteReconciler) makePodTemplateForRepoChecker(webSite *websitev1beta
 	}
 
 	newTemplate.Spec.SecurityContext = &corev1.PodSecurityContext{
-		RunAsUser: ptr.To[int64](10000),
-		FSGroup:   ptr.To[int64](10000),
+		RunAsUser:           ptr.To[int64](1000),
+		FSGroup:             ptr.To[int64](1000),
+		FSGroupChangePolicy: ptr.To(corev1.FSGroupChangeOnRootMismatch),
 	}
 
 	if webSite.Spec.DeployKeySecretName != nil {
@@ -550,7 +551,8 @@ func (r *WebSiteReconciler) makeNginxPodTemplate(ctx context.Context, webSite *w
 		)
 	}
 	newTemplate.Spec.SecurityContext = &corev1.PodSecurityContext{
-		FSGroup: ptr.To[int64](10000),
+		FSGroup:             ptr.To[int64](1000),
+		FSGroupChangePolicy: ptr.To(corev1.FSGroupChangeOnRootMismatch),
 	}
 
 	newTemplate.Spec.Containers = append(newTemplate.Spec.Containers, corev1.Container{
@@ -603,7 +605,7 @@ func (r *WebSiteReconciler) makeNginxPodTemplate(ctx context.Context, webSite *w
 		Image:   webSite.Spec.BuildImage,
 		Command: []string{"/bin/bash", "-c", "/build/" + BuildScriptName + ".sh"},
 		SecurityContext: &corev1.SecurityContext{
-			RunAsUser: ptr.To[int64](10000),
+			RunAsUser: ptr.To[int64](1000),
 		},
 		VolumeMounts: []corev1.VolumeMount{
 			{
@@ -899,14 +901,15 @@ func (r *WebSiteReconciler) reconcileAfterBuildScript(ctx context.Context, webSi
 		)
 	}
 	template.Spec.SecurityContext = &corev1.PodSecurityContext{
-		FSGroup: ptr.To[int64](10000),
+		FSGroup:             ptr.To[int64](1000),
+		FSGroupChangePolicy: ptr.To(corev1.FSGroupChangeOnRootMismatch),
 	}
 	buildContainer := corev1.Container{
 		Name:    "job",
 		Image:   webSite.Spec.BuildImage,
 		Command: []string{"/bin/bash", "-c", "/after-build/" + AfterBuildScriptName + ".sh"},
 		SecurityContext: &corev1.SecurityContext{
-			RunAsUser: ptr.To[int64](10000),
+			RunAsUser: ptr.To[int64](1000),
 		},
 		VolumeMounts: []corev1.VolumeMount{
 			{

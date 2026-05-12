@@ -5,8 +5,10 @@ git clone $REPO_URL
 cd $REPO_NAME
 git checkout $REVISION
 
+python3 -m venv venv
+source venv/bin/activate
+
 pip3 install -r requirements.txt
-export PATH=$PATH:$HOME/.local/bin
 mkdocs build
 
 rm -rf $OUTPUT/*

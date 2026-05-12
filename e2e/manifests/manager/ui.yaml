@@ -1,3 +1,4 @@
+$patch: delete
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -8,4 +9,5 @@ spec:
     spec:
       containers:
         - name: ui
-          image: ghcr.io/zoetrope/website-operator-ui:dev-amd64
+          image: ghcr.io/cybozu-go/website-operator-ui:dev
+          imagePullPolicy: Never

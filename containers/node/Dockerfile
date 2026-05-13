@@ -46,6 +46,7 @@ RUN apt-get update \
         # necessary for plantuml
         default-jre \
         graphviz \
+ && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
 RUN --mount=type=bind,from=pnpm-download,source=/pnpm,target=/tmp/pnpm \

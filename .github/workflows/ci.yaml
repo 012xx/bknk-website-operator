@@ -85,6 +85,7 @@ jobs:
     strategy:
       matrix:
         image:
+          - ubuntu
           - nginx
           - node
           - python
@@ -118,9 +119,10 @@ jobs:
           set -e
           EXIT_CODE=$?
           if [ $EXIT_CODE -eq 0 ]; then
-            echo "Image ghcr.io/cybozu-go/${IMAGE}:${TAG} already exists. Skipping build and push."
+            echo "Image ghcr.io/cybozu-go/${IMAGE}:${TAG} already exists. Skipping push."
             echo "exists=true" >> "$GITHUB_OUTPUT"
           elif echo "${INSPECT_OUTPUT}" | grep -qE "manifest unknown"; then
+            echo "Image ghcr.io/cybozu-go/${IMAGE}:${TAG} does not exist. It will be pushed when the branch is main."
             echo "exists=false" >> "$GITHUB_OUTPUT"
           else
             echo "Failed to check image existence: ${INSPECT_OUTPUT}"

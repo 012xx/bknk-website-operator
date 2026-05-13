@@ -13,7 +13,9 @@ RUN UBUNTU_CODENAME=$(. /etc/os-release && echo "$UBUNTU_CODENAME") \
  && echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.asc] http://nginx.org/packages/ubuntu ${UBUNTU_CODENAME} nginx" \
    | tee /etc/apt/sources.list.d/nginx.list \
  && apt-get update \
- && apt-get install --no-install-recommends -y "nginx=${NGINX_VERSION}~${UBUNTU_CODENAME}" \
+ && apt-get install --no-install-recommends -y \
+      "nginx=${NGINX_VERSION}~${UBUNTU_CODENAME}" \
+ && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
 COPY --chown=www-data:www-data nginx.conf /etc/nginx/nginx.conf

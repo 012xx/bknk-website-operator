@@ -71,7 +71,7 @@ jobs:
           kubectl describe pod
   check-e2e-test:
     name: All e2e tests passed
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     needs: e2e
     permissions: {}
     steps:
@@ -139,6 +139,13 @@ jobs:
             ghcr.io/cybozu-go/website-operator-${{ matrix.image }}:${{ steps.get_tags.outputs.TAG }}
           build-args: |
             BASE_TAG=${{ steps.get_tags.outputs.BASE_TAG }}
+  wait-for-build-images:
+    name: All builder images are built
+    runs-on: ubuntu-slim
+    needs: builders
+    permissions: {}
+    steps:
+      - run: echo ok
   check-goreleaser-config:
     name: Check goreleaser.yml
     runs-on: ubuntu-24.04

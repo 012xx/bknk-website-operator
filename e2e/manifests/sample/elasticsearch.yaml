@@ -25,7 +25,7 @@ spec:
               value: -Xms2048M -Xmx2048M
             - name: discovery.type
               value: single-node
-          image: ghcr.io/zoetrope/elasticsearch:8.17.0
+          image: ghcr.io/cybozu-go/website-operator-elasticsearch:dev
           imagePullPolicy: IfNotPresent
           name: elasticsearch
           ports:

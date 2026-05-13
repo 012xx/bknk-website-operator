@@ -36,7 +36,7 @@ metadata:
   name: honkit-sample
   namespace: default
 spec:
-  buildImage: ghcr.io/zoetrope/node:22.16.0
+  buildImage: ghcr.io/cybozu-go/website-operator-node:24.14.1.0
   buildScript:
     rawData: |
         #!/bin/bash -ex
@@ -117,7 +117,7 @@ metadata:
   name: honkit-sample
   namespace: default
 spec:
-  buildImage: ghcr.io/zoetrope/node:22.16.0
+  buildImage: ghcr.io/cybozu-go/website-operator-node:24.14.1.0
   buildScript:
     configMap:
       name: build-scripts
@@ -132,11 +132,11 @@ You can setting `afterBuildScript` by above procedure
 
 The following containers are provided to build your sites.
 
-- [Ubuntu](https://github.com/users/zoetrope/packages/container/package/ubuntu)
-- [Node](https://github.com/users/zoetrope/packages/container/package/node)
-- [Python](https://github.com/users/zoetrope/packages/container/package/python)
+- [Ubuntu](https://github.com/cybozu-go/packages/container/package/website-operator-ubuntu)
+- [Node](https://github.com/cybozu-go/packages/container/package/website-operator-node)
+- [Python](https://github.com/cybozu-go/packages/container/package/website-operator-python)
 
-If you want to customize a container image to generate your site, I recommend that you create a container image based on [Ubuntu](https://github.com/users/zoetrope/packages/container/package/ubuntu).
+If you want to customize a container image to generate your site, I recommend that you create a container image based on [Ubuntu](https://github.com/cybozu-go/packages/container/package/website-operator-ubuntu).
 
 ### Private Repository
 
@@ -171,7 +171,7 @@ metadata:
   name: mkdocs-sample
   namespace: default
 spec:
-  buildImage: ghcr.io/zoetrope/python:3.10.12
+  buildImage: ghcr.io/cybozu-go/website-operator-python:3.12.3.0
   buildScript:
     configMap:
       name: build-scripts
@@ -226,7 +226,7 @@ metadata:
   name: honkit-sample
   namespace: default
 spec:
-  buildImage: ghcr.io/zoetrope/node:22.16.0
+  buildImage: ghcr.io/cybozu-go/website-operator-node:24.14.1.0
   buildScript:
     configMap:
       name: build-scripts

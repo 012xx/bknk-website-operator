@@ -1,10 +1,11 @@
-FROM ghcr.io/cybozu/ubuntu:24.04
+ARG BASE_TAG=24.04
+FROM ghcr.io/cybozu/ubuntu:${BASE_TAG}
 
 LABEL org.opencontainers.image.source=https://github.com/cybozu-go/website-operator
 
 ARG NGINX_VERSION=1.28.3-1
 
-COPY containers/nginx/apt_pref /etc/apt/preferences.d/99nginx
+COPY apt_pref /etc/apt/preferences.d/99nginx
 
 RUN UBUNTU_CODENAME=$(. /etc/os-release && echo "$UBUNTU_CODENAME") \
  && curl -sS https://nginx.org/keys/nginx_signing.key \
@@ -15,7 +16,7 @@ RUN UBUNTU_CODENAME=$(. /etc/os-release && echo "$UBUNTU_CODENAME") \
  && apt-get install --no-install-recommends -y "nginx=${NGINX_VERSION}~${UBUNTU_CODENAME}" \
  && rm -rf /var/lib/apt/lists/*
 
-COPY --chown=www-data:www-data containers/nginx/nginx.conf /etc/nginx/nginx.conf
+COPY --chown=www-data:www-data nginx.conf /etc/nginx/nginx.conf
 
 RUN set -x \
  && mkdir -p /var/log/nginx \

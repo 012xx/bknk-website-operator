@@ -29,6 +29,15 @@ test: launch-kind load-images setup-cluster
 # Build all artifacts for the architecture of the host machine and load them into the kind cluster.
 .PHONY: load-images
 load-images:
+	cd ../containers && for d in */Dockerfile; do \
+	  img=$$(dirname $${d%/}); \
+	  echo "Loading $${d} image into kind cluster..."; \
+	  docker buildx build -t $(REGISTRY)website-operator-$${img}:dev \
+	    --build-arg BASE_TAG=$$(cat BASE_TAG) \
+		$${img}; \
+	  kind load docker-image --name=$(KIND_CLUSTER_NAME) $(REGISTRY)website-operator-$${img}:dev; \
+	done
+
 	cd ../ && cat .goreleaser.yml \
 	  | ARCH="$(HOST_ARCH)" \
 	    yq '(.builds[].goarch) |= map(select(. == env(ARCH)))' \
@@ -42,9 +51,3 @@ load-images:
 	kind load docker-image --name=$(KIND_CLUSTER_NAME) $(REGISTRY)repo-checker:dev
 	docker tag $(REGISTRY)website-operator-ui:dev-$(HOST_ARCH) $(REGISTRY)website-operator-ui:dev
 	kind load docker-image --name=$(KIND_CLUSTER_NAME) $(REGISTRY)website-operator-ui:dev
-	docker tag $(REGISTRY)website-operator-node:dev-$(HOST_ARCH) $(REGISTRY)website-operator-node:dev
-	kind load docker-image --name=$(KIND_CLUSTER_NAME) $(REGISTRY)website-operator-node:dev
-	docker tag $(REGISTRY)website-operator-python:dev-$(HOST_ARCH) $(REGISTRY)website-operator-python:dev
-	kind load docker-image --name=$(KIND_CLUSTER_NAME) $(REGISTRY)website-operator-python:dev
-	docker tag $(REGISTRY)website-operator-nginx:dev-$(HOST_ARCH) $(REGISTRY)website-operator-nginx:dev
-	kind load docker-image --name=$(KIND_CLUSTER_NAME) $(REGISTRY)website-operator-nginx:dev

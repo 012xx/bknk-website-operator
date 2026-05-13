@@ -1,5 +1,6 @@
 ARG NODE_VERSION=24.14.1
 ARG PNPM_VERSION=v10.33.0
+ARG BASE_TAG=24.04
 
 FROM scratch AS node-amd64
 ARG NODE_VERSION
@@ -25,7 +26,7 @@ ADD --checksum=sha256:06755ad2817548b84317d857d5c8003dc6e9e28416a3ea7467256c49ab
 FROM node-${TARGETARCH} AS node-download
 FROM pnpm-${TARGETARCH} AS pnpm-download
 
-FROM ghcr.io/cybozu/ubuntu:24.04 AS builder
+FROM ghcr.io/cybozu/ubuntu:${BASE_TAG} AS builder
 
 LABEL org.opencontainers.image.source=https://github.com/cybozu-go/website-operator
 

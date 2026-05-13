@@ -105,45 +105,6 @@ dockers_v2:
       org.opencontainers.image.version: "{{ .Version }}"
     flags:
       - "--target=repo-checker"
-  - id: node
-    dockerfile: ./containers/node/Dockerfile
-    images:
-      - "ghcr.io/cybozu-go/website-operator-node"
-    tags:
-      - "{{ if .IsSnapshot }}{{ .Version }}{{ else }}24.14.1.0{{ end }}"
-    platforms:
-      - linux/amd64
-      - linux/arm64
-    labels:
-      org.opencontainers.image.created: "{{ .Date }}"
-      org.opencontainers.image.revision: "{{ .FullCommit }}"
-  - id: nginx
-    dockerfile: ./containers/nginx/Dockerfile
-    extra_files:
-      - ./containers/nginx/nginx.conf
-      - ./containers/nginx/apt_pref
-    images:
-      - "ghcr.io/cybozu-go/website-operator-nginx"
-    tags:
-      - "{{ if .IsSnapshot }}{{ .Version }}{{ else }}1.28.3.0{{ end }}"
-    platforms:
-      - linux/amd64
-      - linux/arm64
-    labels:
-      org.opencontainers.image.created: "{{ .Date }}"
-      org.opencontainers.image.revision: "{{ .FullCommit }}"
-  - id: python
-    dockerfile: ./containers/python/Dockerfile
-    images:
-      - "ghcr.io/cybozu-go/website-operator-python"
-    tags:
-      - "{{ if .IsSnapshot }}{{ .Version }}{{ else }}3.12.3.0{{ end }}"
-    platforms:
-      - linux/amd64
-      - linux/arm64
-    labels:
-      org.opencontainers.image.created: "{{ .Date }}"
-      org.opencontainers.image.revision: "{{ .FullCommit }}"
 checksum:
   name_template: 'checksums.txt'
 snapshot:

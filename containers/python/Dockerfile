@@ -1,4 +1,5 @@
-FROM ghcr.io/cybozu/ubuntu:24.04
+ARG BASE_TAG=24.04
+FROM ghcr.io/cybozu/ubuntu:${BASE_TAG}
 
 LABEL org.opencontainers.image.source=https://github.com/cybozu-go/website-operator
 

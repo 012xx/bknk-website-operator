@@ -52,6 +52,9 @@ const (
 	AfterBuildScriptName      = "after-build"
 	NginxPort                 = 8080
 	AnnChecksumConfig         = "checksum/config"
+	UbuntuUID           int64 = 1000
+	UbuntuGID           int64 = 1000
+	WWWDataUID          int64 = 33
 )
 
 func NewWebSiteReconciler(client client.Client, log logr.Logger, scheme *runtime.Scheme, nginxContainerImage string, repoCheckerContainerImage string, operatorNamespace string, revCli RevisionClient) *WebSiteReconciler {
@@ -347,8 +350,8 @@ func (r *WebSiteReconciler) makePodTemplateForRepoChecker(webSite *websitev1beta
 	}
 
 	newTemplate.Spec.SecurityContext = &corev1.PodSecurityContext{
-		RunAsUser:           ptr.To[int64](1000),
-		FSGroup:             ptr.To[int64](1000),
+		RunAsUser:           ptr.To(UbuntuUID),
+		FSGroup:             ptr.To(UbuntuGID),
 		FSGroupChangePolicy: ptr.To(corev1.FSGroupChangeOnRootMismatch),
 	}
 
@@ -551,7 +554,7 @@ func (r *WebSiteReconciler) makeNginxPodTemplate(ctx context.Context, webSite *w
 		)
 	}
 	newTemplate.Spec.SecurityContext = &corev1.PodSecurityContext{
-		FSGroup:             ptr.To[int64](1000),
+		FSGroup:             ptr.To(UbuntuGID),
 		FSGroupChangePolicy: ptr.To(corev1.FSGroupChangeOnRootMismatch),
 	}
 
@@ -582,7 +585,7 @@ func (r *WebSiteReconciler) makeNginxPodTemplate(ctx context.Context, webSite *w
 			},
 		},
 		SecurityContext: &corev1.SecurityContext{
-			RunAsUser: ptr.To[int64](33), // id for www-data
+			RunAsUser: ptr.To(WWWDataUID),
 		},
 		ReadinessProbe: &corev1.Probe{
 			ProbeHandler: corev1.ProbeHandler{
@@ -605,7 +608,7 @@ func (r *WebSiteReconciler) makeNginxPodTemplate(ctx context.Context, webSite *w
 		Image:   webSite.Spec.BuildImage,
 		Command: []string{"/bin/bash", "-c", "/build/" + BuildScriptName + ".sh"},
 		SecurityContext: &corev1.SecurityContext{
-			RunAsUser: ptr.To[int64](1000),
+			RunAsUser: ptr.To(UbuntuUID),
 		},
 		VolumeMounts: []corev1.VolumeMount{
 			{
@@ -901,7 +904,7 @@ func (r *WebSiteReconciler) reconcileAfterBuildScript(ctx context.Context, webSi
 		)
 	}
 	template.Spec.SecurityContext = &corev1.PodSecurityContext{
-		FSGroup:             ptr.To[int64](1000),
+		FSGroup:             ptr.To(UbuntuGID),
 		FSGroupChangePolicy: ptr.To(corev1.FSGroupChangeOnRootMismatch),
 	}
 	buildContainer := corev1.Container{
@@ -909,7 +912,7 @@ func (r *WebSiteReconciler) reconcileAfterBuildScript(ctx context.Context, webSi
 		Image:   webSite.Spec.BuildImage,
 		Command: []string{"/bin/bash", "-c", "/after-build/" + AfterBuildScriptName + ".sh"},
 		SecurityContext: &corev1.SecurityContext{
-			RunAsUser: ptr.To[int64](1000),
+			RunAsUser: ptr.To(UbuntuUID),
 		},
 		VolumeMounts: []corev1.VolumeMount{
 			{

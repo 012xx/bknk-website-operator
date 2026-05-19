@@ -11,7 +11,7 @@ spec:
           image: ghcr.io/cybozu-go/website-operator:dev
           imagePullPolicy: Never
           args:
-            - --repochecker-container-image=ghcr.io/cybozu-go/repo-checker:dev
+            - --repochecker-container-image=ghcr.io/cybozu-go/website-operator-repo-checker:dev
           env:
           - name: NGINX_CONTAINER_IMAGE
             value: ghcr.io/cybozu-go/website-operator-nginx:dev

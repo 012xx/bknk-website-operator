@@ -4,7 +4,7 @@ metadata:
   name: mkdocs-sample
   namespace: default
 spec:
-  buildImage: ghcr.io/zoetrope/python:3.10.12
+  buildImage: ghcr.io/cybozu-go/website-operator-python:dev
   buildScript:
     configMap:
       name: build-scripts

@@ -71,8 +71,78 @@ jobs:
           kubectl describe pod
   check-e2e-test:
     name: All e2e tests passed
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     needs: e2e
+    permissions: {}
+    steps:
+      - run: echo ok
+  builders:
+    name: Build builder containers
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        image:
+          - ubuntu
+          - nginx
+          - node
+          - python
+          - elasticsearch
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: docker/setup-qemu-action@ce360397dd3f832beb865e1373c09c0e9f86d70a # v4.0.0
+      - uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
+      - name: GHCR Login
+        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4.0.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Get tags
+        id: get_tags
+        env:
+          IMAGE: ${{ matrix.image }}
+        run: |
+          echo "BASE_TAG=$(cat containers/BASE_TAG)" > "$GITHUB_OUTPUT"
+          echo "TAG=$(cat containers/${IMAGE}/TAG)" >> "$GITHUB_OUTPUT"
+      - name: Check builder images existence
+        id: check_existence
+        env:
+          IMAGE: website-operator-${{ matrix.image }}
+          TAG: ${{ steps.get_tags.outputs.TAG }}
+        run: |
+          # This command returns 1 when the manifest does not exist, but it can also return 1 for other errors (e.g., network issues).
+          # To avoid false negatives, we check the output message.
+          set +e
+          INSPECT_OUTPUT=$(docker manifest inspect "ghcr.io/${{ github.repository }}/${IMAGE}:${TAG}" 2>&1)
+          set -e
+          EXIT_CODE=$?
+          if [ $EXIT_CODE -eq 0 ]; then
+            echo "Image ghcr.io/cybozu-go/${IMAGE}:${TAG} already exists. Skipping push."
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          elif echo "${INSPECT_OUTPUT}" | grep -qE "manifest unknown"; then
+            echo "Image ghcr.io/cybozu-go/${IMAGE}:${TAG} does not exist. It will be pushed when the branch is main."
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Failed to check image existence: ${INSPECT_OUTPUT}"
+            exit 1
+          fi
+      - name: Build and push docker image
+        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
+        with:
+          push: ${{ github.ref_name == 'main' && steps.check_existence.outputs.exists == 'false' }}
+          context: containers/${{ matrix.image }}
+          tags: |
+            ghcr.io/cybozu-go/website-operator-${{ matrix.image }}:${{ steps.get_tags.outputs.TAG }}
+          build-args: |
+            BASE_TAG=${{ steps.get_tags.outputs.BASE_TAG }}
+  wait-for-build-images:
+    name: All builder images are built
+    runs-on: ubuntu-slim
+    needs: builders
     permissions: {}
     steps:
       - run: echo ok

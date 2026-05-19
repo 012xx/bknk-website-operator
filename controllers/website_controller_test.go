@@ -376,7 +376,7 @@ metadata:
 spec:
   containers:
   - name: ubuntu
-    image: ghcr.io/zoetrope/ubuntu:22.04
+    image: ghcr.io/cybozu-go/website-operator-ubuntu:24.04.20260508
     command: ["/usr/local/bin/pause"]
 `,
 			}
@@ -539,7 +539,7 @@ func newWebSite() *websiteBuilder {
 			Namespace: "test",
 		},
 		Spec: websitev1beta1.WebSiteSpec{
-			BuildImage: "ghcr.io/zoetrope/node:22.16.0",
+			BuildImage: "ghcr.io/cybozu-go/website-operator-node:24.14.1.0",
 			RepoURL:    "https://github.com/neco-test/honkit-sample.git",
 			Branch:     "main",
 		},

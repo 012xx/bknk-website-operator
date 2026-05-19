@@ -92,7 +92,7 @@ dockers_v2:
     extra_files:
       - LICENSE
     images:
-      - "ghcr.io/cybozu-go/repo-checker"
+      - "ghcr.io/cybozu-go/website-operator-repo-checker"
     tags:
       - "{{ .Version }}"
       - "{{ .Major }}.{{ .Minor }}"

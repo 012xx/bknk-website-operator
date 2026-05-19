@@ -31,7 +31,7 @@ spec:
             - /website-operator
           args:
             - --leader-elect
-            - --repochecker-container-image=ghcr.io/cybozu-go/repo-checker:dev
+            - --repochecker-container-image=ghcr.io/cybozu-go/website-operator-repo-checker:dev
           image: ghcr.io/cybozu-go/website-operator:dev
           name: manager
           securityContext:

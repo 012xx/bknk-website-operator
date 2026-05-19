@@ -5,4 +5,4 @@ const (
 	WebSiteIndexField          = ".status.ready"
 )
 
-var DefaultRepoCheckerContainerImage = "ghcr.io/cybozu-go/repo-checker:" + Version
+var DefaultRepoCheckerContainerImage = "ghcr.io/cybozu-go/website-operator-repo-checker:" + Version

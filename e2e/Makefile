@@ -47,7 +47,7 @@ load-images:
 
 	docker tag $(REGISTRY)website-operator:dev-$(HOST_ARCH) $(REGISTRY)website-operator:dev
 	kind load docker-image --name=$(KIND_CLUSTER_NAME) $(REGISTRY)website-operator:dev
-	docker tag $(REGISTRY)repo-checker:dev-$(HOST_ARCH) $(REGISTRY)repo-checker:dev
-	kind load docker-image --name=$(KIND_CLUSTER_NAME) $(REGISTRY)repo-checker:dev
+	docker tag $(REGISTRY)website-operator-repo-checker:dev-$(HOST_ARCH) $(REGISTRY)website-operator-repo-checker:dev
+	kind load docker-image --name=$(KIND_CLUSTER_NAME) $(REGISTRY)website-operator-repo-checker:dev
 	docker tag $(REGISTRY)website-operator-ui:dev-$(HOST_ARCH) $(REGISTRY)website-operator-ui:dev
 	kind load docker-image --name=$(KIND_CLUSTER_NAME) $(REGISTRY)website-operator-ui:dev

@@ -1,4 +1,4 @@
-FROM ghcr.io/cybozu/ubuntu:24.04 AS base
+FROM ghcr.io/cybozu/ubuntu:24.04.20260515@sha256:3dbd144876260304d7929364c50012b71b967ceeb4c8a1ab1d70aacb0846182c AS base
 
 LABEL org.opencontainers.image.source=https://github.com/cybozu-go/website-operator
 

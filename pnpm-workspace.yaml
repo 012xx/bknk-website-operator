@@ -1,0 +1,4 @@
+packages:
+  - ui/frontend
+
+minimumReleaseAge: 20160

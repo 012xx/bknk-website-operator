@@ -20,3 +20,4 @@ build
 tmp
 testbin/*
 tilt_modules
+node_modules

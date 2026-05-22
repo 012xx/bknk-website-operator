@@ -151,3 +151,16 @@ helm-history: ## Show Helm release history.
 .PHONY: helm-rollback
 helm-rollback: ## Rollback to previous Helm release.
 	$(HELM) rollback $(HELM_RELEASE) --namespace $(HELM_NAMESPACE)
+
+##@ Container Image
+
+IMG ?= controller:latest
+BUILDPLATFORMS ?= linux/amd64,linux/arm64
+
+.PHONY: docker-build
+docker-build: frontend all ## Build container image with docker buildx
+	@mkdir -p linux/amd64 linux/arm64
+	cp bin/website-operator linux/amd64/
+	cp bin/repo-checker linux/amd64/
+	cp bin/website-operator-ui linux/amd64/
+	docker buildx build --load -t ${IMG} --target website-operator .

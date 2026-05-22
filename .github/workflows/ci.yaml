@@ -25,16 +25,10 @@ jobs:
       - run: chmod 0600 ./e2e/manifests/website/.ssh/id_rsa
       - run: make test
   ui:
-    name: Build UI frontend
-    runs-on: ubuntu-24.04
+    uses: ./.github/workflows/frontend.yaml
     permissions:
       contents: read
       id-token: write
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - uses: ./.github/actions/setup-node
-      - run: make frontend
-      - uses: ./.github/actions/upload-ui-dist
   e2e:
     name: End-to-end Test
     runs-on: ubuntu-24.04

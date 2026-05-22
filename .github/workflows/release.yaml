@@ -4,8 +4,14 @@ on:
     tags:
       - 'v*'
 jobs:
+  ui:
+    uses: ./.github/workflows/frontend.yaml
+    permissions:
+      contents: read
+      id-token: write
   release:
     runs-on: ubuntu-24.04
+    needs: [ui]
     permissions:
       contents: write
       packages: write
@@ -14,6 +20,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
+      - uses: ./.github/actions/download-ui-dist
       - uses: docker/setup-qemu-action@ce360397dd3f832beb865e1373c09c0e9f86d70a # v4.0.0
       - uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
       - name: GHCR Login
@@ -25,35 +32,19 @@ jobs:
       - uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
         with:
           go-version-file: go.mod
-      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
-        with:
-          version: 10
-      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
-        with:
-          node-version: 24
-          cache: 'pnpm'
-          cache-dependency-path: ./pnpm-lock.yaml
-      - uses: aquaproj/aqua-installer@11dd79b4e498d471a9385aa9fb7f62bb5f52a73c # v4.0.4
-        with:
-          aqua_version: v2.55.2 # renovate: aquaproj/aqua
-          aqua_opts: ""
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: ./.github/actions/setup-aqua
       - name: Set previous release tag for GoReleaser
         run: |
           export TAG=$(curl -s "https://api.github.com/repos/cybozu-go/website-operator/releases/latest" | jq -r .tag_name)
           echo "GORELEASER_PREVIOUS_TAG=${TAG}" >> $GITHUB_ENV
-      - name: GoReleaser
-        uses: goreleaser/goreleaser-action@ec59f474b9834571250b370d4735c50f8e2d1e29 # v7.0.0
-        with:
-          version: v2.14.3
-          args: release --clean
+      - name: Publish release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          goreleaser release --clean --skip=before
   chart-release:
     runs-on: ubuntu-24.04
     needs: release
-    if: contains(needs.release.result, 'success')
     permissions:
       contents: write
     steps:

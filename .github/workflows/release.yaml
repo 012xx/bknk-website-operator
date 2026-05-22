@@ -26,12 +26,7 @@ jobs:
         with:
           go-version-file: go.mod
       - uses: .github/actions/setup-node
-      - uses: aquaproj/aqua-installer@11dd79b4e498d471a9385aa9fb7f62bb5f52a73c # v4.0.4
-        with:
-          aqua_version: v2.55.2 # renovate: aquaproj/aqua
-          aqua_opts: ""
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: .github/actions/setup-aqua
       - name: Set previous release tag for GoReleaser
         run: |
           export TAG=$(curl -s "https://api.github.com/repos/cybozu-go/website-operator/releases/latest" | jq -r .tag_name)

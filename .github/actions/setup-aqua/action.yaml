@@ -1,0 +1,32 @@
+name: Setup aqua and tools
+description: Setup aqua and tools for CI workflows.
+inputs:
+  save-cache:
+    description: |
+      If true, the action will save the cache after installing all tools.
+      If false, the action skips saving the cache, but restores the cache if it exists.
+    required: false
+    default: "false"
+runs:
+  using: "composite"
+  steps:
+    - name: Restore aqua caches (restoring cache only)
+      if: ${{ inputs.save-cache == 'false' }}
+      uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      with:
+        path: ~/.local/share/aquaproj-aqua
+        key: v1-aqua-installer-${{runner.os}}-${{runner.arch}}-${{hashFiles('aqua.yaml')}}
+        restore-keys: |
+          v1-aqua-installer-${{runner.os}}-${{runner.arch}}
+    - name: Restore aqua caches (saving cache is enabled)
+      if: ${{ inputs.save-cache != 'false' }}
+      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      with:
+        path: ~/.local/share/aquaproj-aqua
+        key: v1-aqua-installer-${{runner.os}}-${{runner.arch}}-${{hashFiles('aqua.yaml')}}
+        restore-keys: |
+          v1-aqua-installer-${{runner.os}}-${{runner.arch}}
+    - uses: aquaproj/aqua-installer@11dd79b4e498d471a9385aa9fb7f62bb5f52a73c # v4.0.4
+      with:
+        aqua_version: v2.55.2 # renovate: aquaproj/aqua
+        aqua_opts: ${{ case(inputs.save-cache != 'false', '', '-l')}}

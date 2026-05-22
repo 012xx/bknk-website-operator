@@ -27,9 +27,25 @@ jobs:
           EOF
       - run: chmod 0600 ./e2e/manifests/website/.ssh/id_rsa
       - run: make test
+  ui:
+    name: Build UI frontend
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: .github/actions/setup-node
+      - run: make frontend
+      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: website-operator-ui
+          path: |
+            ui/frontend/dist
   e2e:
     name: End-to-end Test
     runs-on: ubuntu-24.04
+    needs: [test, ui]
     permissions:
       contents: read
     strategy:
@@ -40,17 +56,10 @@ jobs:
           - v1.34.3@sha256:08497ee19eace7b4b5348db5c6a1591d7752b164530a36f855cb0f2bdcbadd48 # renovate: kindest/node
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: .github/actions/download-ui-dist
       - uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
         with:
           go-version-file: go.mod
-      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
-        with:
-          version: 10
-      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
-        with:
-          node-version: 24
-          cache: 'pnpm'
-          cache-dependency-path: ./pnpm-lock.yaml
       - uses: aquaproj/aqua-installer@11dd79b4e498d471a9385aa9fb7f62bb5f52a73c # v4.0.4
         with:
           aqua_version: v2.55.2 # renovate: aquaproj/aqua
@@ -163,6 +172,7 @@ jobs:
   tilt:
     name: Run tilt ci
     runs-on: ubuntu-24.04
+    needs: [ui]
     permissions:
       contents: read
     steps:
@@ -170,14 +180,7 @@ jobs:
       - uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
         with:
           go-version-file: go.mod
-      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
-        with:
-          version: 10
-      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
-        with:
-          node-version: 24
-          cache: 'pnpm'
-          cache-dependency-path: ./pnpm-lock.yaml
+      - uses: .github/actions/download-ui-dist
       - uses: aquaproj/aqua-installer@11dd79b4e498d471a9385aa9fb7f62bb5f52a73c # v4.0.4
         with:
           aqua_version: v2.55.2 # renovate: aquaproj/aqua
@@ -189,6 +192,7 @@ jobs:
   dry-run:
     name: Dry-run release
     runs-on: ubuntu-24.04
+    needs: [ui]
     permissions:
       contents: read
     steps:
@@ -201,14 +205,7 @@ jobs:
       - uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
         with:
           go-version-file: go.mod
-      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
-        with:
-          version: 10
-      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
-        with:
-          node-version: 24
-          cache: 'pnpm'
-          cache-dependency-path: ./pnpm-lock.yaml
+      - uses: .github/actions/download-ui-dist
       - uses: aquaproj/aqua-installer@11dd79b4e498d471a9385aa9fb7f62bb5f52a73c # v4.0.4
         with:
           aqua_version: v2.55.2 # renovate: aquaproj/aqua
@@ -222,4 +219,4 @@ jobs:
         uses: goreleaser/goreleaser-action@ec59f474b9834571250b370d4735c50f8e2d1e29 # v7.0.0
         with:
           version: v2.14.3
-          args: --snapshot --skip=publish --clean
+          args: --snapshot --skip=publish,before --clean

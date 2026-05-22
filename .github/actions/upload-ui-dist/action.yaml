@@ -1,0 +1,12 @@
+name: Upload website-operator-ui dist
+description: Upload the dist directory of website-operator-ui built in the CI workflow.
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      with:
+        name: website-operator-ui
+        path: |
+          ui/frontend/dist
+        if-no-files-found: error

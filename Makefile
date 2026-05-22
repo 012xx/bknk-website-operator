@@ -35,6 +35,11 @@ manifests: ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefin
 	controller-gen $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 	kustomize build config/crd | yq e "." - > charts/website-operator/crds/website-crd.yaml
 
+.PHONY: build-installer
+build-installer: manifests generate ## Generate dist/install.yaml with all Kubernetes manifests
+	mkdir -p dist
+	kustomize build config/default > dist/install.yaml
+
 .PHONY: generate-chart
 generate-chart:
 	kustomize build config/release | helmify -crd-dir charts/website-operator

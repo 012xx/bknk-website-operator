@@ -157,10 +157,9 @@ jobs:
       - uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
         with:
           go-version-file: go.mod
-      - uses: goreleaser/goreleaser-action@ec59f474b9834571250b370d4735c50f8e2d1e29 # v7.0.0
-        with:
-          version: v2.14.3
-          args: check -f .goreleaser.yml
+      - name: run goreleaser check
+        run: |
+          goreleaser check -f .goreleaser.yml
   tilt:
     name: Run tilt ci
     runs-on: ubuntu-24.04
@@ -197,8 +196,6 @@ jobs:
       - name: Setup tag for goreleaser
         run: |
           echo "GORELEASER_CURRENT_TAG=$(git describe --tags --abbrev=0 --match "v*" || echo v0.0.0)" >> $GITHUB_ENV
-      - name: GoReleaser
-        uses: goreleaser/goreleaser-action@ec59f474b9834571250b370d4735c50f8e2d1e29 # v7.0.0
-        with:
-          version: v2.14.3
-          args: --snapshot --skip=publish,before --clean
+      - name: run goreleaser in dry-run mode
+        run: |
+          goreleaser release --snapshot --skip=publish,before --clean

@@ -45,7 +45,6 @@ jobs:
   chart-release:
     runs-on: ubuntu-24.04
     needs: release
-    if: contains(needs.release.result, 'success')
     permissions:
       contents: write
     steps:

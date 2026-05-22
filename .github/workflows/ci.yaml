@@ -111,20 +111,20 @@ jobs:
       - name: Check builder images existence
         id: check_existence
         env:
-          IMAGE: website-operator-${{ matrix.image }}
+          IMAGE: ghcr.io/cybozu-go/website-operator-${{ matrix.image }}
           TAG: ${{ steps.get_tags.outputs.TAG }}
         run: |
           # This command returns 1 when the manifest does not exist, but it can also return 1 for other errors (e.g., network issues).
           # To avoid false negatives, we check the output message.
           set +e
-          INSPECT_OUTPUT=$(docker manifest inspect "ghcr.io/${{ github.repository }}/${IMAGE}:${TAG}" 2>&1)
-          set -e
+          INSPECT_OUTPUT=$(docker manifest inspect "${IMAGE}:${TAG}" 2>&1)
           EXIT_CODE=$?
+          set -e
           if [ $EXIT_CODE -eq 0 ]; then
-            echo "Image ghcr.io/cybozu-go/${IMAGE}:${TAG} already exists. Skipping push."
+            echo "Image ${IMAGE}:${TAG} already exists. Skipping push."
             echo "exists=true" >> "$GITHUB_OUTPUT"
           elif echo "${INSPECT_OUTPUT}" | grep -qE "manifest unknown"; then
-            echo "Image ghcr.io/cybozu-go/${IMAGE}:${TAG} does not exist. It will be pushed when the branch is main."
+            echo "Image ${IMAGE}:${TAG} does not exist. It will be pushed when the branch is main."
             echo "exists=false" >> "$GITHUB_OUTPUT"
           else
             echo "Failed to check image existence: ${INSPECT_OUTPUT}"

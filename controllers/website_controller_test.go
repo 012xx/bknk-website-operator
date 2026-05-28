@@ -47,7 +47,7 @@ var _ = Describe("WebSite controller", func() {
 		time.Sleep(100 * time.Millisecond)
 
 		mgr, err := ctrl.NewManager(cfg, ctrl.Options{
-			Scheme: scheme,
+			Scheme:  scheme,
 			Metrics: metricsserver.Options{BindAddress: "127.0.0.1:0"},
 			Controller: config.Controller{
 				SkipNameValidation: ptr.To(true),

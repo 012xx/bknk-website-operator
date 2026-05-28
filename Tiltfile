@@ -46,7 +46,12 @@ local_resource('Watch&Compile repo-checker', "make bin/repo-checker", deps=repoc
 ui_deps = ['ui', 'cmd/website-operator-ui', 'version.go', 'constants.go']
 local_resource('Watch&Compile website-operator-ui', "make frontend; make bin/website-operator-ui", deps=ui_deps, ignore=['ui/frontend/node_modules', 'ui/frontend/dist', 'ui/frontend/.parcel-cache', 'ui/frontend/package*'])
 
-local_resource('Sample YAML', 'kubectl apply -f ./config/samples', deps=["./config/samples"], resource_deps=[DIRNAME + "-controller-manager"])
+local_resource(
+    'Sample YAML',
+    'kubectl create namespace website-operator-system --dry-run=client -o yaml | kubectl apply -f - && kubectl apply -f ./config/samples',
+    deps=["./config/samples"],
+    resource_deps=[DIRNAME + "-controller-manager"],
+)
 
 docker_build_with_restart('website-operator:dev', '.',
  dockerfile_contents=OPERATOR_DOCKERFILE,

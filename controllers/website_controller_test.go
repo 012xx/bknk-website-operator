@@ -19,6 +19,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/config"
+	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 )
 
 var _ = Describe("WebSite controller", func() {
@@ -47,6 +48,7 @@ var _ = Describe("WebSite controller", func() {
 
 		mgr, err := ctrl.NewManager(cfg, ctrl.Options{
 			Scheme: scheme,
+			Metrics: metricsserver.Options{BindAddress: "127.0.0.1:0"},
 			Controller: config.Controller{
 				SkipNameValidation: ptr.To(true),
 			},

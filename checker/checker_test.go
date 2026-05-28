@@ -48,7 +48,15 @@ func TestPrivateRepository(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = os.Setenv("GIT_SSH_COMMAND", "ssh -F "+filepath.Join(wd, "..", "e2e", "manifests", "website", ".ssh", "config")+" -i "+filepath.Join(wd, "..", "e2e", "manifests", "website", ".ssh", "id_rsa"))
+	sshConfig := filepath.Join(wd, "..", "e2e", "manifests", "website", ".ssh", "config")
+	sshKey := filepath.Join(wd, "..", "e2e", "manifests", "website", ".ssh", "id_rsa")
+	if _, err := os.Stat(sshConfig); err != nil {
+		t.Skip("skipping private repository test: ssh config is not available")
+	}
+	if _, err := os.Stat(sshKey); err != nil {
+		t.Skip("skipping private repository test: ssh private key is not available")
+	}
+	err = os.Setenv("GIT_SSH_COMMAND", "ssh -F "+sshConfig+" -i "+sshKey)
 	if err != nil {
 		t.Fatal(err)
 	}

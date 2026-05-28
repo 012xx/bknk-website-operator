@@ -32,8 +32,6 @@ local_resource(
 installed = local("which kubebuilder")
 print("kubebuilder is present:", installed)
 
-DIRNAME = os.path.basename(os. getcwd())
-
 watch_settings(ignore=['config/crd/bases/', 'config/rbac/role.yaml', 'config/webhook/manifests.yaml'])
 k8s_yaml(kustomize('./config/dev'))
 
@@ -44,9 +42,14 @@ repochecker_deps = ['checker', 'cmd/repo-checker', 'version.go', 'constants.go']
 local_resource('Watch&Compile repo-checker', "make bin/repo-checker", deps=repochecker_deps)
 
 ui_deps = ['ui', 'cmd/website-operator-ui', 'version.go', 'constants.go']
-local_resource('Watch&Compile website-operator-ui', "make frontend; make bin/website-operator-ui", deps=ui_deps, ignore=['ui/frontend/node_modules', 'ui/frontend/dist', 'ui/frontend/.parcel-cache', 'ui/frontend/package*'])
 
-local_resource('Sample YAML', 'kubectl apply -f ./config/samples', deps=["./config/samples"], resource_deps=[DIRNAME + "-controller-manager"])
+ui_build_cmd = "make frontend; make bin/website-operator-ui"
+if os.getenv('CI') == 'true':
+    ui_build_cmd = "make bin/website-operator-ui"
+
+local_resource('Watch&Compile website-operator-ui', ui_build_cmd, deps=ui_deps, ignore=['ui/frontend/node_modules', 'ui/frontend/dist', 'ui/frontend/.parcel-cache', 'ui/frontend/package*'])
+
+local_resource('Sample YAML', 'kubectl apply -f ./config/samples', deps=["./config/samples"], resource_deps=['website-operator-controller-manager'])
 
 docker_build_with_restart('website-operator:dev', '.',
  dockerfile_contents=OPERATOR_DOCKERFILE,

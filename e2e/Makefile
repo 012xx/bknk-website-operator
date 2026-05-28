@@ -43,7 +43,7 @@ load-images:
 	    yq '(.builds[].goarch) |= map(select(. == env(ARCH)))' \
 	  | PLATFORM="linux/$(HOST_ARCH)" \
 	    yq '(.dockers_v2[].platforms) |= map(select(. == env(PLATFORM)))' \
-	  | goreleaser release -f - --clean --snapshot --skip=publish
+	  | goreleaser release -f - --clean --snapshot --skip=publish,before
 
 	docker tag $(REGISTRY)website-operator:dev-$(HOST_ARCH) $(REGISTRY)website-operator:dev
 	kind load docker-image --name=$(KIND_CLUSTER_NAME) $(REGISTRY)website-operator:dev

@@ -2433,7 +2433,6 @@ spec:
       containers:
       - args:
         - --leader-elect
-        - --repochecker-container-image=ghcr.io/cybozu-go/website-operator-repo-checker:dev
         command:
         - /website-operator
         env:
@@ -2480,7 +2479,7 @@ spec:
     spec:
       containers:
       - args:
-        - --allow-cors=true
+        - --allow-cors=false
         command:
         - /website-operator-ui
         env:

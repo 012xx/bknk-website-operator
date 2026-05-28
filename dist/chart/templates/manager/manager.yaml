@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
       - args:
-        - --allow-cors=true
+        - --allow-cors=false
         command:
         - /website-operator-ui
         env:

@@ -25,7 +25,7 @@ manager:
   ## Arguments
   ##
   args:
-    - --allow-cors=true
+    - --allow-cors=false
 
   ## Environment variables
   ##

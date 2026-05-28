@@ -39,6 +39,11 @@ manifests: ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefin
 generate-chart:
 	kustomize build config/release | helmify -crd-dir charts/website-operator
 
+.PHONY: build-installer
+build-installer: manifests ## Generate dist/install.yaml from kustomize release manifests.
+	mkdir -p dist
+	kustomize build config/release > dist/install.yaml
+
 .PHONY: generate
 generate: ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
 	controller-gen object:headerFile="hack/boilerplate.go.txt" paths="./..."

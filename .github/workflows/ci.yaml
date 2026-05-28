@@ -15,21 +15,24 @@ jobs:
       - uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
         with:
           go-version-file: go.mod
-      - uses: aquaproj/aqua-installer@11dd79b4e498d471a9385aa9fb7f62bb5f52a73c # v4.0.4
+      - uses: ./.github/actions/setup-aqua
         with:
-          aqua_version: v2.55.2 # renovate: aquaproj/aqua
-          aqua_opts: ""
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          save-cache: true
       - run: |
           cat > ./e2e/manifests/website/.ssh/id_rsa <<EOF
           ${{ secrets.DEPLOY_KEY }}
           EOF
       - run: chmod 0600 ./e2e/manifests/website/.ssh/id_rsa
       - run: make test
+  ui:
+    uses: ./.github/workflows/frontend.yaml
+    permissions:
+      contents: read
+      id-token: write
   e2e:
     name: End-to-end Test
     runs-on: ubuntu-24.04
+    needs: [test, ui]
     permissions:
       contents: read
     strategy:
@@ -40,23 +43,11 @@ jobs:
           - v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f # renovate: kindest/node
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: ./.github/actions/download-ui-dist
       - uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
         with:
           go-version-file: go.mod
-      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
-        with:
-          version: 10
-      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
-        with:
-          node-version: 24
-          cache: 'pnpm'
-          cache-dependency-path: ./pnpm-lock.yaml
-      - uses: aquaproj/aqua-installer@11dd79b4e498d471a9385aa9fb7f62bb5f52a73c # v4.0.4
-        with:
-          aqua_version: v2.55.2 # renovate: aquaproj/aqua
-          aqua_opts: ""
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: ./.github/actions/setup-aqua
       - run: |
           cat > ./e2e/manifests/website/.ssh/id_rsa <<EOF
           ${{ secrets.DEPLOY_KEY }}
@@ -111,20 +102,20 @@ jobs:
       - name: Check builder images existence
         id: check_existence
         env:
-          IMAGE: website-operator-${{ matrix.image }}
+          IMAGE: ghcr.io/cybozu-go/website-operator-${{ matrix.image }}
           TAG: ${{ steps.get_tags.outputs.TAG }}
         run: |
           # This command returns 1 when the manifest does not exist, but it can also return 1 for other errors (e.g., network issues).
           # To avoid false negatives, we check the output message.
           set +e
-          INSPECT_OUTPUT=$(docker manifest inspect "ghcr.io/${{ github.repository }}/${IMAGE}:${TAG}" 2>&1)
-          set -e
+          INSPECT_OUTPUT=$(docker manifest inspect "${IMAGE}:${TAG}" 2>&1)
           EXIT_CODE=$?
+          set -e
           if [ $EXIT_CODE -eq 0 ]; then
-            echo "Image ghcr.io/cybozu-go/${IMAGE}:${TAG} already exists. Skipping push."
+            echo "Image ${IMAGE}:${TAG} already exists. Skipping push."
             echo "exists=true" >> "$GITHUB_OUTPUT"
           elif echo "${INSPECT_OUTPUT}" | grep -qE "manifest unknown"; then
-            echo "Image ghcr.io/cybozu-go/${IMAGE}:${TAG} does not exist. It will be pushed when the branch is main."
+            echo "Image ${IMAGE}:${TAG} does not exist. It will be pushed when the branch is main."
             echo "exists=false" >> "$GITHUB_OUTPUT"
           else
             echo "Failed to check image existence: ${INSPECT_OUTPUT}"
@@ -153,16 +144,14 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
-        with:
-          go-version-file: go.mod
-      - uses: goreleaser/goreleaser-action@ec59f474b9834571250b370d4735c50f8e2d1e29 # v7.0.0
-        with:
-          version: v2.14.3
-          args: check -f .goreleaser.yml
+      - uses: ./.github/actions/setup-aqua
+      - name: run goreleaser check
+        run: |
+          goreleaser check -f .goreleaser.yml
   tilt:
     name: Run tilt ci
     runs-on: ubuntu-24.04
+    needs: [ui]
     permissions:
       contents: read
     steps:
@@ -170,25 +159,14 @@ jobs:
       - uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
         with:
           go-version-file: go.mod
-      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
-        with:
-          version: 10
-      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
-        with:
-          node-version: 24
-          cache: 'pnpm'
-          cache-dependency-path: ./pnpm-lock.yaml
-      - uses: aquaproj/aqua-installer@11dd79b4e498d471a9385aa9fb7f62bb5f52a73c # v4.0.4
-        with:
-          aqua_version: v2.55.2 # renovate: aquaproj/aqua
-          aqua_opts: ""
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: ./.github/actions/download-ui-dist
+      - uses: ./.github/actions/setup-aqua
       - run: make dev
       - run: tilt ci
   dry-run:
     name: Dry-run release
     runs-on: ubuntu-24.04
+    needs: [ui, check-goreleaser-config]
     permissions:
       contents: read
     steps:
@@ -201,25 +179,11 @@ jobs:
       - uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
         with:
           go-version-file: go.mod
-      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
-        with:
-          version: 10
-      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
-        with:
-          node-version: 24
-          cache: 'pnpm'
-          cache-dependency-path: ./pnpm-lock.yaml
-      - uses: aquaproj/aqua-installer@11dd79b4e498d471a9385aa9fb7f62bb5f52a73c # v4.0.4
-        with:
-          aqua_version: v2.55.2 # renovate: aquaproj/aqua
-          aqua_opts: ""
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: ./.github/actions/download-ui-dist
+      - uses: ./.github/actions/setup-aqua
       - name: Setup tag for goreleaser
         run: |
           echo "GORELEASER_CURRENT_TAG=$(git describe --tags --abbrev=0 --match "v*" || echo v0.0.0)" >> $GITHUB_ENV
-      - name: GoReleaser
-        uses: goreleaser/goreleaser-action@ec59f474b9834571250b370d4735c50f8e2d1e29 # v7.0.0
-        with:
-          version: v2.14.3
-          args: --snapshot --skip=publish --clean
+      - name: run goreleaser in dry-run mode
+        run: |
+          goreleaser release --snapshot --skip=publish,before --clean

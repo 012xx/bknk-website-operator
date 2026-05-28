@@ -1,4 +1,4 @@
-KUBERNETES_VERSION := v1.34.3@sha256:08497ee19eace7b4b5348db5c6a1591d7752b164530a36f855cb0f2bdcbadd48 # renovate: kindest/node
+KUBERNETES_VERSION := v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f # renovate: kindest/node
 REGISTRY := ghcr.io/cybozu-go/
 KIND_CLUSTER_NAME=website-e2e
 
@@ -43,7 +43,7 @@ load-images:
 	    yq '(.builds[].goarch) |= map(select(. == env(ARCH)))' \
 	  | PLATFORM="linux/$(HOST_ARCH)" \
 	    yq '(.dockers_v2[].platforms) |= map(select(. == env(PLATFORM)))' \
-	  | goreleaser release -f - --clean --snapshot --skip=publish,before
+	  | goreleaser release -f - --clean --snapshot --skip=publish
 
 	docker tag $(REGISTRY)website-operator:dev-$(HOST_ARCH) $(REGISTRY)website-operator:dev
 	kind load docker-image --name=$(KIND_CLUSTER_NAME) $(REGISTRY)website-operator:dev
